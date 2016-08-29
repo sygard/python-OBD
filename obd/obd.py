@@ -236,23 +236,32 @@ class OBD(object):
         return True
 
 
-    def query(self, cmd, force=False):
+    def query(self, *cmds, force=False):
         """
             primary API function. Sends commands to the car, and
             protects against sending unsupported commands.
+            
+            update (@sommersoft): changed cmd arg to an arbitrary
+            argument to facilitate sending multiple PID requests
+            at once; per issue #31.
         """
 
         if self.status() == OBDStatus.NOT_CONNECTED:
             logger.warning("Query failed, no connection available")
             return OBDResponse()
-
+            
+        if len(cmds) > 6:
+            logger.warning("Query failed, too many PIDs requested")
+            return OBDResponse()  #would OBDResponse() work for this?
+            
         # if the user forces, skip all checks
         if not force and not self.test_cmd(cmd):
             return OBDResponse()
 
         # send command and retrieve message
-        logger.info("Sending command: %s" % str(cmd))
-        cmd_string = self.__build_command_string(cmd)
+        logger.info("Sending command(s): %s" % str(cmds))
+        for each value in cmds  #loop through each cmd in the *cmds list
+            cmd_string = cmd_string + " " + self.__build_command_string(value)
         messages = self.interface.send_and_parse(cmd_string)
 
         # if we're sending a new command, note it
