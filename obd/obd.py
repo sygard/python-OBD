@@ -250,9 +250,15 @@ class OBD(object):
             logger.warning("Query failed, no connection available")
             return OBDResponse()
             
-        if len(cmds) > 6:
-            logger.warning("Query failed, too many PIDs requested")
-            return OBDResponse()  #would OBDResponse() work for this?
+        if len(cmds) > 1:
+            # Multiple PID requests are only implemented for the CAN protocols 
+            if self.interface.protocol_id() not in ["6", "7", "8", "9"]: 
+                if warn: 
+                    logger.warning("Multiple PID requests are only supported over CAN protocols")
+                return OBDResponse()
+            elif len(cmds) > 6:
+                logger.warning("Query failed, too many PIDs requested")
+                return OBDResponse()
             
         # if the user forces, skip all checks
         if not force and not self.test_cmd(cmd):
