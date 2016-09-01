@@ -259,15 +259,17 @@ class OBD(object):
             elif len(cmds) > 6:
                 logger.warning("Query failed, too many PIDs requested")
                 return OBDResponse()
-            
-        # if the user forces, skip all checks
-        if not force and not self.test_cmd(cmd):
-            return OBDResponse()
+            cmd_string = self.__queryMulti(cmds)
+        else:
+            cmd_string = self.__build_command_string(cmds)    
+
+            # if the user forces, skip all checks
+            if not force and not self.test_cmd(cmds):
+                return OBDResponse()
 
         # send command and retrieve message
         logger.info("Sending command(s): %s" % str(cmds))
-        for each value in cmds  #loop through each cmd in the *cmds list
-            cmd_string = cmd_string + " " + self.__build_command_string(value)
+
         messages = self.interface.send_and_parse(cmd_string)
 
         # if we're sending a new command, note it
@@ -278,8 +280,8 @@ class OBD(object):
 
         # if we don't already know how many frames this command returns,
         # log it, so we can specify it next time
-        if cmd not in self.__frame_counts:
-            self.__frame_counts[cmd] = sum([len(m.frames) for m in messages])
+        if cmds not in self.__frame_counts:
+            self.__frame_counts[cmds] = sum([len(m.frames) for m in messages])
 
         if not messages:
             logger.info("No valid OBD Messages returned")
@@ -287,6 +289,19 @@ class OBD(object):
 
         return cmd(messages) # compute a response object
 
+
+    def __queryMulti(self, *cmds)
+        
+        for each value in cmds  #loop through each cmd in the *cmds list
+            # if the user forces, skip all checks
+            if not force and not self.test_cmd(value):
+                return OBDResponse()
+            # still deciding if __build_cmd_str will work here
+            # might need to handle here b/c of the _frame_counts
+            cmd_string += self.__build_command_string(value) + " "
+        
+        # strip trailing " " space and return
+        return cmd_string.rstrip()
 
     def __build_command_string(self, cmd):
         """ assembles the appropriate command string """
