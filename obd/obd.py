@@ -287,7 +287,7 @@ class OBD(object):
             logger.info("No valid OBD Messages returned")
             return OBDResponse()
 
-        return cmd(messages) # compute a response object
+        return cmds(messages) # compute a response object
 
 
     def __queryMulti(self, *cmds)
