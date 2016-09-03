@@ -219,6 +219,9 @@ class ELM327:
 
         # -------------- 0100 (first command, SEARCH protocols) --------------
         r0100 = self.__send(b"0100")
+        if self.__has_message(r0100, "UNABLE TO CONNECT"): # protocol denied immediately; most likely not connected to car
+            logger.error("Failed to determine protocol")
+            return False
 
         # ------------------- ATDPN (list protocol number) -------------------
         r = self.__send(b"ATDPN")
