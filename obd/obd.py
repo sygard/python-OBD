@@ -236,14 +236,14 @@ class OBD(object):
         return True
 
 
-    def query(self, *cmds, force=False):
+    def query(self, force=False, *cmds):
         """
             primary API function. Sends commands to the car, and
             protects against sending unsupported commands.
             
             update (@sommersoft): changed cmd arg to an arbitrary
             argument to facilitate sending multiple PID requests
-            at once; per issue #31.
+            at once, and broke out cmd_string construction; per issue #31.
         """
 
         if self.status() == OBDStatus.NOT_CONNECTED:
@@ -256,6 +256,7 @@ class OBD(object):
                 if warn: 
                     logger.warning("Multiple PID requests are only supported over CAN protocols")
                 return OBDResponse()
+            # Maximum of 6 multiple PIDs per request.
             elif len(cmds) > 6:
                 logger.warning("Query failed, too many PIDs requested")
                 return OBDResponse()
@@ -279,8 +280,8 @@ class OBD(object):
             self.__last_command = cmd_string
 
         # if we don't already know how many frames this command returns,
-        # log it, so we can specify it next time
-        if cmds not in self.__frame_counts:
+        # log it, so we can specify it next time (single commands only)
+        if len(cmds) < 2 and cmds not in self.__frame_counts:
             self.__frame_counts[cmds] = sum([len(m.frames) for m in messages])
 
         if not messages:
@@ -292,13 +293,15 @@ class OBD(object):
 
     def __queryMulti(self, *cmds)
         
-        for each value in cmds  #loop through each cmd in the *cmds list
+        for cmd in cmds:  #loop through each cmd in the *cmds list
             # if the user forces, skip all checks
-            if not force and not self.test_cmd(value):
+            if not force and not self.test_cmd(cmd):
                 return OBDResponse()
-            # still deciding if __build_cmd_str will work here
-            # might need to handle here b/c of the _frame_counts
-            cmd_string += self.__build_command_string(value) + " "
+            # don't utilize _build_command_string b/c of possible
+            # return of CR
+            if self.fast and cmd.fast and (cmd in self.__frame_counts):
+                cmd_string += str(self.__frame_counts[cmd]).encode() + " "
+                
         
         # strip trailing " " space and return
         return cmd_string.rstrip()
