@@ -291,7 +291,7 @@ class OBD(object):
         return cmds(messages) # compute a response object
 
 
-    def __queryMulti(self, *cmds)
+    def __queryMulti(self, *cmds):
         
         for cmd in cmds:  #loop through each cmd in the *cmds list
             # if the user forces, skip all checks
