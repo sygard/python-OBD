@@ -416,7 +416,8 @@ class ELM327:
         if self.__port:
             cmd += b"\r\n" # terminate
             logger.debug("write: " + repr(cmd))
-            self.__port.flushInput() # dump everything in the input buffer
+            #self.__port.flushInput() # dump everything in the input buffer               !---- used in pyserial earlier than 3.0
+            self.__port.reset_input_buffer() # dump everything in the input buffer        !---- used in pyserial 3.0 and later
             self.__port.write(cmd) # turn the string into bytes and write
             self.__port.flush() # wait for the output buffer to finish transmitting
         else:
