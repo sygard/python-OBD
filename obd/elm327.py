@@ -219,11 +219,17 @@ class ELM327:
 
         # -------------- 0100 (first command, SEARCH protocols) --------------
         r0100 = self.__send(b"0100")
+<<<<<<< HEAD
         if self.__has_message(r0100, "UNABLE TO CONNECT"):
             logger.error("Failed to determine protocol")
             return False
 
 
+=======
+        if self.__has_message(r0100, "UNABLE TO CONNECT"): # protocol denied immediately; most likely not connected to car
+            logger.error("Failed to determine protocol")
+            return False
+>>>>>>> 8e073964e7fc4a9eac03ff5f10b74c2e50097e9e
 
         # ------------------- ATDPN (list protocol number) -------------------
         r = self.__send(b"ATDPN")
@@ -301,7 +307,8 @@ class ELM327:
             logger.debug("Response from baud %d: %s" % (baud, repr(response)))
 
             # watch for the prompt character
-            if response.endswith(b">"):
+            #if response.endswith(b">"):
+            if b">" in response:  # I am getting '>' with the STN11xx, but not at the end
                 logger.debug("Choosing baud %d" % baud)
                 self.__port.timeout = timeout # reinstate our original timeout
                 return True
