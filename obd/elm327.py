@@ -299,7 +299,8 @@ class ELM327:
             logger.debug("Response from baud %d: %s" % (baud, repr(response)))
 
             # watch for the prompt character
-            if response.endswith(b">"):
+            #if response.endswith(b">"):
+            if b">" in response:  # I am getting '>' with the STN11xx, but not at the end
                 logger.debug("Choosing baud %d" % baud)
                 self.__port.timeout = timeout # reinstate our original timeout
                 return True
