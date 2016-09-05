@@ -314,13 +314,15 @@ class OBD(object):
             elif len(cmds) > 6:
                 logger.warning("Query failed, too many PIDs requested")
                 return OBDResponse()
-    
+            elif len(cmds) == 0:
+                logger.warning("Query failed, zero PIDs requested")
+                return OBDResponse()
+
             # loop through the *cmds list, append them as keys into the
             # cmd_msg dict, build the command string, then send and
             # parse the message updating the cmd_msg dict
             cmd_msg = {}
             i = 0
-    
             for cmd in cmds:
                 # check that each command is the same PID mode
                 # first PID request will set the main mode
@@ -347,8 +349,10 @@ class OBD(object):
                 logger.info("Adding multi-command: %s" % str(cmd))
                 cmd_string += cmd.command[2:] + " "
                 cmd_msg[cmd.command[2:]] = cmd.bytes
-                    
+
             # cmd_string built. send off for the response
+            cmd_string = cmd_string.rstrip
+            logger.info("cmd_string built: %s" % cmd_string)
             messages = self.interface.send_and_parse(cmd_string)
     
             if not messages:
