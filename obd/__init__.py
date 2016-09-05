@@ -38,7 +38,7 @@
 ########################################################################
 
 from .__version__ import __version__
-from .obd import OBD
+#from .obd import OBD
 from .obd_multi import OBD # TODO: remove when multi-PID queries are working
 from .async import Async
 from .commands import commands
