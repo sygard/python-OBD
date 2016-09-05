@@ -300,7 +300,8 @@ class ELM327:
 
             # watch for the prompt character
             #if response.endswith(b">"):
-            if b">" in response:  # I am getting '>' with the STN11xx, but not at the end
+            # TODO: remove (if b">" in response) and revert to (if response.endswith) before final push/merge
+            if b">" in response:  # I am getting '>' with the STN11xx, but not at the end; edit - only occurs when car power = off
                 logger.debug("Choosing baud %d" % baud)
                 self.__port.timeout = timeout # reinstate our original timeout
                 return True
