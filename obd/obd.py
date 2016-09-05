@@ -312,14 +312,14 @@ class OBD(object):
         """ assembles the appropriate command string """
 
         logger.info("BCS cmd: %s" % cmd.name)
-        logger.info("Encoded _frame_counts: %s" % str(self.__frame_counts[cmd.bytes]).encode())
+        logger.info("_frame_counts: %s" % self.__frame_counts[cmd])
         cmd_string = cmd.command
 
         # if we know the number of frames that this command returns,
         # only wait for exactly that number. This avoids some harsh
         # timeouts from the ELM, thus speeding up queries.
         if self.fast and cmd.fast and (cmd in self.__frame_counts):
-            cmd_string += str(self.__frame_counts[cmd.bytes]).encode()
+            cmd_string += str(self.__frame_counts[cmd]).encode()
 
         # if we sent this last time, just send a CR
         # (CR is added by the ELM327 class)
