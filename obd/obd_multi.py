@@ -55,7 +55,7 @@ class OBD(object):
         self.__last_command = b"" # used for running the previous command with a CR
         self.__frame_counts = {} # keeps track of the number of return frames for each command
 
-        logger.info("======================= python-OBD (v%s) =======================" % __version__)
+        logger.info("!=================== python-OBD_multi (v%s) ===================!" % __version__)
         self.__connect(portstr, baudrate, protocol) # initialize by connecting and loading sensors
         self.__load_commands()            # try to load the car's supported commands
         logger.info("===================================================================")
