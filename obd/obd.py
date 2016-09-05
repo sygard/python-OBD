@@ -55,7 +55,7 @@ class OBD(object):
         self.__last_command = b"" # used for running the previous command with a CR
         self.__frame_counts = {} # keeps track of the number of return frames for each command
 
-        logger.info("!====================== python-OBD (v%s) ======================!" % __version__)
+        logger.info("======================= python-OBD (v%s) =======================" % __version__)
         self.__connect(portstr, baudrate, protocol) # initialize by connecting and loading sensors
         self.__load_commands()            # try to load the car's supported commands
         logger.info("===================================================================")
@@ -109,10 +109,9 @@ class OBD(object):
             if not self.test_cmd(get, warn=False):
                 continue
 
-            logger.info("testing get: %s" % get.command)
             # when querying, only use the blocking OBD.query()
             # prevents problems when query is redefined in a subclass (like Async)
-            response = OBD.query(self, False, get)
+            response = OBD.query(self, get)
 
             if response.is_null():
                 logger.info("No valid data for PID listing command: %s" % get)
@@ -237,42 +236,23 @@ class OBD(object):
         return True
 
 
-    def query(self, force=False, *cmds):
+    def query(self, cmd, force=False):
         """
             primary API function. Sends commands to the car, and
             protects against sending unsupported commands.
-            
-            update (@sommersoft): changed cmd arg to an arbitrary
-            argument to facilitate sending multiple PID requests
-            at once, and broke out cmd_string construction; per issue #31.
         """
-        logger.info("Received query for cmd: %s" % cmds)
 
         if self.status() == OBDStatus.NOT_CONNECTED:
             logger.warning("Query failed, no connection available")
             return OBDResponse()
-            
-        if len(cmds) > 1:
-            # Multiple PID requests are only implemented for the CAN protocols 
-            if self.interface.protocol_id() not in ["6", "7", "8", "9"]: 
-                if warn: 
-                    logger.warning("Multiple PID requests are only supported over CAN protocols")
-                return OBDResponse()
-            # Maximum of 6 multiple PIDs per request.
-            elif len(cmds) > 6:
-                logger.warning("Query failed, too many PIDs requested")
-                return OBDResponse()
-            cmd_string = self.__queryMulti(*cmds)
-        else:
-            cmd_string = self.__build_command_string(*cmds)    
 
-            # if the user forces, skip all checks
-            if not force and not self.test_cmd(*cmds):
-                return OBDResponse()
+        # if the user forces, skip all checks
+        if not force and not self.test_cmd(cmd):
+            return OBDResponse()
 
         # send command and retrieve message
-        logger.info("Sending command(s): %s" % str(*cmds))
-
+        logger.info("Sending command: %s" % str(cmd))
+        cmd_string = self.__build_command_string(cmd)
         messages = self.interface.send_and_parse(cmd_string)
 
         # if we're sending a new command, note it
@@ -282,49 +262,31 @@ class OBD(object):
             self.__last_command = cmd_string
 
         # if we don't already know how many frames this command returns,
-        # log it, so we can specify it next time (single commands only)
-        if len(cmds) < 2 and cmds not in self.__frame_counts:
-            self.__frame_counts[cmds] = sum([len(m.frames) for m in messages])
+        # log it, so we can specify it next time
+        if cmd not in self.__frame_counts:
+            self.__frame_counts[cmd] = sum([len(m.frames) for m in messages])
 
         if not messages:
             logger.info("No valid OBD Messages returned")
             return OBDResponse()
 
-        logger.info("Message rcvd: %s" % messages)
-        return cmds(messages) # compute a response object
+        return cmd(messages) # compute a response object
 
-
-    def __queryMulti(self, *cmds):
-        
-        for cmd in cmds:  #loop through each cmd in the *cmds list
-            # if the user forces, skip all checks
-            if not force and not self.test_cmd(cmd):
-                return OBDResponse()
-            # don't utilize _build_command_string b/c of possible
-            # return of CR
-            if self.fast and cmd.fast and (cmd in self.__frame_counts):
-                cmd_string += str(self.__frame_counts[cmd]).encode() + " "
-                
-        
-        # strip trailing " " space and return
-        return cmd_string.rstrip()
 
     def __build_command_string(self, cmd):
         """ assembles the appropriate command string """
-
-        logger.info("BCS cmd: %s" % cmd.command)
         cmd_string = cmd.command
 
         # if we know the number of frames that this command returns,
         # only wait for exactly that number. This avoids some harsh
         # timeouts from the ELM, thus speeding up queries.
-        if self.fast and cmd.fast and (cmd.name in self.__frame_counts):
+        if self.fast and cmd.fast and (cmd in self.__frame_counts):
             cmd_string += str(self.__frame_counts[cmd]).encode()
 
         # if we sent this last time, just send a CR
         # (CR is added by the ELM327 class)
         if self.fast and (cmd_string == self.__last_command):
             cmd_string = b""
-        
-        logger.info("BCS cmd_string: %s" % cmd_string)
+
         return cmd_string
+
