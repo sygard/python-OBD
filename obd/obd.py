@@ -311,8 +311,8 @@ class OBD(object):
     def __build_command_string(self, cmd):
         """ assembles the appropriate command string """
 
-        logger.info("BCS cmd: %s" % cmd.command)
-        logger.info("Encoded _frame_counts: %s" % str(self.__frame_counts[cmd]).encode())
+        logger.info("BCS cmd: %s" % cmd.name)
+        logger.info("Encoded _frame_counts: %s" % str(self.__frame_counts[cmd.name]).encode())
         cmd_string = cmd.command
 
         # if we know the number of frames that this command returns,
