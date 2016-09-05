@@ -312,7 +312,6 @@ class OBD(object):
         """ assembles the appropriate command string """
 
         logger.info("BCS cmd: %s" % cmd.name)
-        #logger.info("_frame_counts: %s" % self.__frame_counts[cmd])
         cmd_string = cmd.command
 
         # if we know the number of frames that this command returns,
@@ -325,5 +324,6 @@ class OBD(object):
         # (CR is added by the ELM327 class)
         if self.fast and (cmd_string == self.__last_command):
             cmd_string = b""
-
+        
+        logger.info("BCS cmd_string: %s" % cmd_string)
         return cmd_string
