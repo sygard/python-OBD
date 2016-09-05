@@ -267,11 +267,11 @@ class OBD(object):
             cmd_string = self.__build_command_string(*cmds)    
 
             # if the user forces, skip all checks
-            if not force and not self.test_cmd(cmds):
+            if not force and not self.test_cmd(*cmds):
                 return OBDResponse()
 
         # send command and retrieve message
-        logger.info("Sending command(s): %s" % str(cmds))
+        logger.info("Sending command(s): %s" % str(*cmds))
 
         messages = self.interface.send_and_parse(cmd_string)
 
@@ -311,7 +311,7 @@ class OBD(object):
     def __build_command_string(self, cmd):
         """ assembles the appropriate command string """
 
-        logger.info("BCS cmd: %s" % cmd.name)
+        logger.info("BCS cmd: %s" % cmd.command)
         cmd_string = cmd.command
 
         # if we know the number of frames that this command returns,
