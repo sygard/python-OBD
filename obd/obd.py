@@ -323,7 +323,7 @@ class OBD(object):
             # parse the message updating the cmd_msg dict
             cmd_msg = {}
             i = 0
-            for cmd in cmds:
+            for cmd in *cmds:
                 # check that each command is the same PID mode
                 # first PID request will set the main mode
                 # good: '> 0104 010B 0111' = '> 01 04 0B 11'
