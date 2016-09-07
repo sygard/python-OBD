@@ -321,9 +321,11 @@ class OBD(object):
             # loop through the *cmds list, append them as keys into the
             # cmd_msg dict, build the command string, then send and
             # parse the message updating the cmd_msg dict
+            cmd_list = list(cmds)
+            print cmds
             cmd_msg = {}
             i = 0
-            for cmd in *cmds:
+            for cmd in cmds:
                 # check that each command is the same PID mode
                 # first PID request will set the main mode
                 # good: '> 0104 010B 0111' = '> 01 04 0B 11'
