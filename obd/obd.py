@@ -331,10 +331,10 @@ class OBD(object):
                 # good: '> 0104 010B 0111' = '> 01 04 0B 11'
                 # bad: '> 0104 020B 0611' = different modes will get chopped
                 if i == 0:
-                    pid_mode = cmd.command[0:1]
-                    cmd_build = pid_mode
+                    pid_mode = cmd.command[:2]
+                    cmd_build = str(pid_mode) + " "
                 else:
-                    if cmd.command[0:1] != pid_mode:
+                    if cmd.command[:2] != pid_mode:
                             logger.warning("Query failed, only one PID mode is allowed"
                                            " in multiple PID requests. Modes %s and %s"
                                            " requested" % pid_mode, cmd.command[0:1])
