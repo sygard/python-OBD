@@ -290,7 +290,7 @@ class OBD(object):
 
         return cmd_string
 
-    def query_multi(self, force=False, *cmds):
+    def query_multi(self, cmds, force=False):
             """
                 primary API function. Sends multiple commands to
                 the car for CAN ONLY, and protects against sending
@@ -359,7 +359,7 @@ class OBD(object):
                 logger.info("No valid OBD Messages returned")
                 return OBDResponse()
     
-            logger.info("Message rcvd: %s" % str(messages))
+            logger.info("Message rcvd: %s" % repr(messages))
             logger.info("cmd_msg{}: %s" % cmd_msg)
     
             #return cmd(messages) # compute a response object
