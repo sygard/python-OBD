@@ -321,8 +321,6 @@ class OBD(object):
             # loop through the *cmds list, append them as keys into the
             # cmd_msg dict, build the command string, then send and
             # parse the message updating the cmd_msg dict
-            #cmd_list = list(cmds)
-            print type(cmds), " : ", cmds
             cmd_msg = {}
             i = 0
             for cmd in cmds:
@@ -361,6 +359,7 @@ class OBD(object):
                 logger.info("No valid OBD Messages returned")
                 return OBDResponse()
     
-            logger.info("Message rcvd: %s" % messages)
+            logger.info("Message rcvd: %s" % str(messages))
+            logger.info("cmd_msg{}: %s" % cmd_msg)
     
             #return cmd(messages) # compute a response object
