@@ -321,8 +321,8 @@ class OBD(object):
             # loop through the *cmds list, append them as keys into the
             # cmd_msg dict, build the command string, then send and
             # parse the message updating the cmd_msg dict
-            cmd_list = list(cmds)
-            print cmds
+            #cmd_list = list(cmds)
+            #print cmds
             cmd_msg = {}
             i = 0
             for cmd in cmds:
