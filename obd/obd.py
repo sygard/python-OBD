@@ -332,7 +332,7 @@ class OBD(object):
                 # bad: '> 0104 020B 0611' = different modes will get chopped
                 if i == 0:
                     pid_mode = cmd.command[0:1]
-                    cmd_string = pid_mode
+                    cmd_build = pid_mode
                 else:
                     if cmd.command[0:1] != pid_mode:
                             logger.warning("Query failed, only one PID mode is allowed"
@@ -349,12 +349,12 @@ class OBD(object):
                 # set as how many bytes the response is (will be used
                 # to parse the return msg)
                 logger.info("Adding multi-command: %s" % str(cmd))
-                cmd_string += cmd.command[2:] + " "
+                cmd_build += cmd.command[2:] + " "
                 cmd_msg[cmd.command[2:]] = cmd.bytes
 
             # cmd_string built. send off for the response
-            cmd_string = cmd_string.rstrip
-            logger.info("cmd_string built: %s" % cmd_string)
+            cmd_string = cmd_build.rstrip()
+            logger.info("cmd_string built: %s" % str(cmd_string))
             messages = self.interface.send_and_parse(cmd_string)
     
             if not messages:
