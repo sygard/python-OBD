@@ -307,9 +307,8 @@ class OBD(object):
                 logger.warning("Query failed, no connection available")
                 return OBDResponse()
             elif self.interface.protocol_id() not in ["6", "7", "8", "9"]:
-                if warn:
-                    logger.warning("Multiple PID requests are only supported in"
-                                    " CAN mode")
+                logger.warning("Multiple PID requests are only supported in"
+                            " CAN mode")
                 return OBDResponse()
             elif len(cmds) > 6:
                 logger.warning("Query failed, too many PIDs requested")
