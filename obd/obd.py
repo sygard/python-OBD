@@ -363,7 +363,7 @@ class OBD(object):
             #    bytz = cmd_msg[cmd.command[2:]]
             
             for i in range(len(messages)):    
-                logger.info("Message rcvd: %s" % messages[i].hex())
+                logger.info("Message rcvd: %s" % messages[i].raw())
             logger.info("cmd_msg{}: %s" % cmd_msg)
     
             #return cmd(messages) # compute a response object
