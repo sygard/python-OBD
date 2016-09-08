@@ -358,7 +358,7 @@ class OBD(object):
                 logger.info("No valid OBD Messages returned")
                 return OBDResponse()
 
-            for i in messages:
+            for i in range((len(messages) - 1)):
                 logger.info("Message rcvd: %s" % messages[i].decode)
             logger.info("cmd_msg{}: %s" % cmd_msg)
     
