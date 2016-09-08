@@ -358,8 +358,12 @@ class OBD(object):
                 logger.info("No valid OBD Messages returned")
                 return OBDResponse()
 
-            for i in range(len(messages)):
-                logger.info("Message rcvd: %s" % messages[i].data.decode())
+            # parse the returned message and update cmd_msg{}
+            #for cmd in cmds:
+            #    bytz = cmd_msg[cmd.command[2:]]
+            
+            for i in range(len(messages)):    
+                logger.info("Message rcvd: %s" % messages[i].hex)
             logger.info("cmd_msg{}: %s" % cmd_msg)
     
             #return cmd(messages) # compute a response object
