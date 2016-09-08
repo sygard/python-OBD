@@ -359,7 +359,7 @@ class OBD(object):
                 return OBDResponse()
 
             for i in range(len(messages)):
-                logger.info("Message rcvd: %s" % messages[i].decode)
+                logger.info("Message rcvd: %s" % messages[i])
             logger.info("cmd_msg{}: %s" % cmd_msg)
     
             #return cmd(messages) # compute a response object
