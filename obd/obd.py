@@ -37,7 +37,7 @@ from .__version__ import __version__
 from .elm327 import ELM327
 from .commands import commands
 from .OBDResponse import OBDResponse
-from .utils import scan_serial, OBDStatus
+from .utils import scan_serial, OBDStatus, isHex
 
 logger = logging.getLogger(__name__)
 
@@ -357,22 +357,35 @@ class OBD(object):
             if not messages:
                 logger.info("No valid OBD Messages returned")
                 return OBDResponse()
+            elif not isHex(messages):
+                logger.info("Non-hex message received")
+                return OBDResponse(None, messages)
 
             for i in range(len(messages)):
                 msgs_comb = str(messages[i].raw()).decode()
                 msgs_split = msgs_comb.splitlines()
-                for v in msgs_split:
+                for v in msgs_split: # cut ECU data
                     if v and v != '>':
-                        msgs_flat += v[7:]
-            
+                        if len(msgs_flat) == 0:
+                            msgs_flat = v[9:] # first message contains return len
+                        else:
+                            msgs_flat += v[5:]
+
             logger.info("Message rcvd: %s" % msgs_flat)
             logger.info("cmd_msg{}: %s" % cmd_msg)
             
-            # parse the returned message and update cmd_msg{}
+            # parse the returned message and update cmd_msg{} with the full command
+            # and trimmed message (to send to OBDCommand), then delete original
+            # dict key.
+            
+            # might have to reverse the looping strategy. start with the msg_flat, so that
+            # return values are limited to returning as a command
             for cmd in cmds:
                 cmd_sub = cmd_msg[cmd.command[2:]]
                 bytz = cmd_msg[cmd_sub]
-                
-                
-    
+                if (where = msgs_flat.find(cmd_sub)) != -1:
+                    cmd_msg[cmd] = msgs_flat[where:(where + bytz)]
+                else:
+                    cmd_msg[cmd] = "NO DATA"
+                del cmd_msg[cmd_sub]
             #return cmd(messages) # compute a response object
