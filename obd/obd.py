@@ -290,19 +290,20 @@ class OBD(object):
 
         return cmd_string
 
+
     def query_multi(self, cmds, force=False):
             """
                 primary API function. Sends multiple commands to
                 the car for CAN ONLY, and protects against sending
                 unsupported commands.
-    
+
                 will (hopefully) return a dict object with cmd:msg
                 format.
-    
+
                 -@sommersoft
-    
+
             """
-    
+
             if self.status() == OBDStatus.NOT_CONNECTED:
                 logger.warning("Query failed, no connection available")
                 return OBDResponse()
@@ -317,49 +318,37 @@ class OBD(object):
                 logger.warning("Query failed, zero PIDs requested")
                 return OBDResponse()
 
+            # check each command for support
+            # skip tests if forced
+            if not force and not all([self.test_cmd(cmd) for cmd in cmds]):
+                return
+
+            # check that each command is the same PID mode
+            # first PID request will set the main mode
+            # good: '> 0104 010B 0111' = '> 01 04 0B 11'
+            # bad: '> 0104 020B 0611' = different modes will get chopped
+            if not all([cmd.mode == cmds[0].mode for cmd in cmds]):
+                logger.warning("commands for query_multi() must be of the same mode")
+                return
+
             # loop through the *cmds list, append them as keys into the
             # cmd_msg dict, build the command string, then send and
             # parse the message updating the cmd_msg dict
             cmd_msg = {}
-            i = 0
+            cmd_string = cmds[0].command[:2] # mode part
             for cmd in cmds:
-                # check that each command is the same PID mode
-                # first PID request will set the main mode
-                # good: '> 0104 010B 0111' = '> 01 04 0B 11'
-                # bad: '> 0104 020B 0611' = different modes will get chopped
-                if i == 0:
-                    pid_mode = cmd.command[:2]
-                    cmd_build = str(pid_mode) + " "
-                else:
-                    if cmd.command[:2] != pid_mode:
-                            logger.warning("Query failed, only one PID mode is allowed"
-                                           " in multiple PID requests. Modes %s and %s"
-                                           " requested" % pid_mode, cmd.command[0:1])
-                            return OBDResponse()
-                i += 1
-    
-                # if the user forces, skip all checks
-                if not force and not self.test_cmd(cmd):
-                    return OBDResponse()
-    
-                # build cmd_string and add cmd to dict with initial value
-                # set as how many bytes the response is (will be used
-                # to parse the return msg)
-                logger.info("Adding multi-command: %s" % str(cmd))
-                cmd_build += cmd.command[2:] + " "
-                cmd_msg[cmd.command[2:]] = cmd.bytes
+                pid_part = cmd.command[2:]
+                cmd_msg[pid_part] = cmd.bytes
+                cmd_string += pid_part
+
 
             # cmd_string built. send off for the response
-            cmd_string = cmd_build.rstrip()
             logger.info("cmd_string built: %s" % str(cmd_string))
             messages = self.interface.send_and_parse(cmd_string)
-    
+
             if not messages:
                 logger.info("No valid OBD Messages returned")
                 return OBDResponse()
-            elif not isHex(messages):
-                logger.info("Non-hex message received")
-                return OBDResponse(None, messages)
 
             for i in range(len(messages)):
                 msgs_comb = str(messages[i].raw()).decode()
