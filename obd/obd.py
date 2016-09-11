@@ -350,31 +350,22 @@ class OBD(object):
                 logger.info("No valid OBD Messages returned")
                 return OBDResponse()
 
-            for i in range(len(messages)):
-                msgs_comb = str(messages[i].raw()).decode()
-                msgs_split = msgs_comb.splitlines()
-                for v in msgs_split: # cut ECU data
-                    if v and v != '>':
-                        if len(msgs_flat) == 0:
-                            msgs_flat = v[9:] # first message contains return len
-                        else:
-                            msgs_flat += v[5:]
-
-            logger.info("Message rcvd: %s" % msgs_flat)
+            
+            logger.info("Message rcvd: %s" % str(messages.data[:]))
             logger.info("cmd_msg{}: %s" % cmd_msg)
             
-            # parse the returned message and update cmd_msg{} with the full command
-            # and trimmed message (to send to OBDCommand), then delete original
-            # dict key.
-            
-            # might have to reverse the looping strategy. start with the msg_flat, so that
-            # return values are limited to returning as a command
+            # parse through the returned message finding the associated command
+            # and how many bytes the command response is. Then add the response
+            # to the cmd_msg key and pop the response out of the message. Then
+            # repeat until the end
+            for i in range(messages.count()): # NOTE: make sure this is eval'd each round since we're popping
+                if messages.data[i] in [0x41, 0x61, 0x91]:
+                     pid_return = messages.data.pop[i]
+                elif str(message.data[i]) in cmd_msg:
+                    k = i + cmd_msg[message.data[i]]
+                    cmd_msg[message.data[i]] = message.data.pop[i:k]
+
+            # build return list for each command
             for cmd in cmds:
-                cmd_sub = cmd_msg[cmd.command[2:]]
-                bytz = cmd_msg[cmd_sub]
-                if (where = msgs_flat.find(cmd_sub)) != -1:
-                    cmd_msg[cmd] = msgs_flat[where:(where + bytz)]
-                else:
-                    cmd_msg[cmd] = "NO DATA"
-                del cmd_msg[cmd_sub]
+                
             #return cmd(messages) # compute a response object
