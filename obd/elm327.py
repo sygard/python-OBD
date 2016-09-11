@@ -462,7 +462,7 @@ class ELM327:
         # log, and remove the "bytearray(   ...   )" part
         logger.debug("read: " + repr(buffer)[10:-1])
 
-#does this clear out needed nulls?        # clean out any null characters
+        # clean out any null characters
         buffer = re.sub(b"\x00", b"", buffer)
 
         # remove the prompt character
