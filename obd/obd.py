@@ -368,16 +368,17 @@ class OBD(object):
             while len(master.data) > 0:
                 pid = master.data[0]
                 cmd = cmds_by_pid.get(pid, None)
-            
+
                 # if the PID we pulled out wasn't one of the commands we were given
                 # then something is very wrong. Abort, and proceed with whatever
                 # we've decoded so far
                 if cmd is None:
                     logger.info("Unrequested command answered: %s" % str(pid)) # TODO: remove after testing
                     break
-            
+    
                 l = cmd.bytes - 1 # this figure INCLUDES the PID byte
-            
+                logger.info("pid: %s, cmd: %s, bytes: %s" % str(pid), str(cmd.pid), str(l))
+
                 # if the message doesn't have enough data left in it to fulfill a
                 # PID, then abort, and proceed with whatever we've decoded so far
                 if l > len(master.data):
