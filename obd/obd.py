@@ -389,7 +389,7 @@ class OBD(object):
                 message.data = master.data[:l]
                 message.data.insert(0, mode) # prepend the original mode byte
                 
-                print unhexlify(message.data)
+                print str(message.data)
             
                 # decode the message
                 responses[cmd] = cmd(message)
