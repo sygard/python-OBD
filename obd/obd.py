@@ -384,7 +384,7 @@ class OBD(object):
                     break
             
                 # construct a new message
-                message = Message(master.frames) # copy of the original lines
+                message = list(Message(master.frames)) # copy of the original lines
                 message.data = master.data[:l]
                 message.data.insert(0, mode) # prepend the original mode byte
             
