@@ -39,6 +39,7 @@ from .commands import commands
 from .OBDResponse import OBDResponse
 from .utils import scan_serial, OBDStatus
 from .protocols import Message
+from binascii import hexlify, unhexlify
 
 logger = logging.getLogger(__name__)
 
@@ -351,7 +352,7 @@ class OBD(object):
                 return OBDResponse()
 
             
-            #logger.info("Message rcvd: %s" % hex(messages))  # TODO: remove after testing
+            logger.info("Message rcvd: %s" % unhexlify(messages))  # TODO: remove after testing
             logger.info("cmd_msg{}: %s" % cmd_msg) # TODO: remove after testing
             
             # parse through the returned message finding the associated command
@@ -384,9 +385,11 @@ class OBD(object):
                     break
             
                 # construct a new message
-                message = list(Message(master.frames)) # copy of the original lines
+                message = Message(master.frames) # copy of the original lines
                 message.data = master.data[:l]
                 message.data.insert(0, mode) # prepend the original mode byte
+                
+                print unhexlify(message)
             
                 # decode the message
                 responses[cmd] = cmd(message)
