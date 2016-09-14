@@ -38,7 +38,7 @@ from .elm327 import ELM327
 from .commands import commands
 from .OBDResponse import OBDResponse
 from .utils import scan_serial, OBDStatus
-from .protocols import *
+from .protocols import Message
 
 logger = logging.getLogger(__name__)
 
@@ -351,7 +351,7 @@ class OBD(object):
                 return OBDResponse()
 
             
-            logger.info("Message rcvd: %s" % messages)  # TODO: remove after testing
+            logger.info("Message rcvd: %s" % hex(messages))  # TODO: remove after testing
             logger.info("cmd_msg{}: %s" % cmd_msg) # TODO: remove after testing
             
             # parse through the returned message finding the associated command
