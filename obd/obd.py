@@ -360,7 +360,8 @@ class OBD(object):
             # message.
             # @brendan-w wrote this newer version
             master = messages[0] # the message that contains our response
-            print master.frames
+            for frame in master.frames:
+                print hexlify(frame)
             mode = master.data.pop(0) # the mode byte (ie, for mode 01 this would be 0x41)
             
             cmds_by_pid = { cmd.pid:cmd for cmd in cmds }
