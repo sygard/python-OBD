@@ -341,9 +341,8 @@ class OBD(object):
                 cmd_msg[pid_part] = cmd.bytes
                 cmd_string += pid_part
 
-
             # cmd_string built. send off for the response
-            logger.info("cmd_string built: %s" % str(cmd_string))
+            logger.info("cmd_string built: %s" % str(cmd_string)) # TODO: remove after testing
             messages = self.interface.send_and_parse(cmd_string)
 
             if not messages:
@@ -351,21 +350,48 @@ class OBD(object):
                 return OBDResponse()
 
             
-            logger.info("Message rcvd: %s" % str(messages.data[:]))
-            logger.info("cmd_msg{}: %s" % cmd_msg)
+            logger.info("Message rcvd: %s" % str(messages.data[:]))  # TODO: remove after testing
+            logger.info("cmd_msg{}: %s" % cmd_msg) # TODO: remove after testing
             
             # parse through the returned message finding the associated command
-            # and how many bytes the command response is. Then add the response
-            # to the cmd_msg key and pop the response out of the message. Then
-            # repeat until the end
-            for i in range(messages.count()): # NOTE: make sure this is eval'd each round since we're popping
-                if messages.data[i] in [0x41, 0x61, 0x91]:
-                     pid_return = messages.data.pop[i]
-                elif str(message.data[i]) in cmd_msg:
-                    k = i + cmd_msg[message.data[i]]
-                    cmd_msg[message.data[i]] = message.data.pop[i:k]
-
-            # build return list for each command
-            for cmd in cmds:
+            # and how many bytes the command response is. then construct a response
+            # message.
+            # @brendan-w wrote this newer version
+            master = messages[0] # the message that contains our response
+            mode = master.data.pop(0) # the mode byte (ie, for mode 01 this would be 0x41)
+            
+            cmds_by_pid = { cmd.pid:cmd for cmd in cmds }
+            responses = { cmd:OBDResponse() for cmd in cmds }
+            
+            while len(master.data) > 0:
+                pid = master.data[0]
+                cmd = cmds_by_pid.get(pid, None)
+            
+                # if the PID we pulled out wasn't one of the commands we were given
+                # then something is very wrong. Abort, and proceed with whatever
+                # we've decoded so far
+                if cmd is None:
+                    logger.info("Unrequested command answered: %s" % str(pid)) # TODO: remove after testing
+                    break
+            
+                l = cmd.bytes - 1 # this figure INCLUDES the PID byte
+            
+                # if the message doesn't have enough data left in it to fulfill a
+                # PID, then abort, and proceed with whatever we've decoded so far
+                if l > len(master.data):
+                    logger.info("Finished parsing query_multi response") # TODO: remove after testing
+                    break
+            
+                # construct a new message
+                message = Message(master.frames) # copy of the original lines
+                message.data = master.data[:l]
+                message.data.insert(0, mode) # prepend the original mode byte
+            
+                # decode the message
+                responses[cmd] = cmd(message)
+            
+                # remove what we just read
+                master.data = master.data[l:]
                 
+            print responses
             #return cmd(messages) # compute a response object
