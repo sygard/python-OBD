@@ -352,7 +352,7 @@ class OBD(object):
                 return OBDResponse()
 
             
-            logger.info("Message rcvd: %s" % unhexlify(messages.data))  # TODO: remove after testing
+            #logger.info("Message rcvd: %s" % unhexlify(messages.data))  # TODO: remove after testing
             logger.info("cmd_msg{}: %s" % cmd_msg) # TODO: remove after testing
             
             # parse through the returned message finding the associated command
