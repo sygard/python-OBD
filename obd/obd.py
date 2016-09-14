@@ -37,7 +37,8 @@ from .__version__ import __version__
 from .elm327 import ELM327
 from .commands import commands
 from .OBDResponse import OBDResponse
-from .utils import scan_serial, OBDStatus, isHex
+from .utils import scan_serial, OBDStatus
+from .protocols import Message
 
 logger = logging.getLogger(__name__)
 
