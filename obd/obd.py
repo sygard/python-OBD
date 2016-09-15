@@ -336,12 +336,9 @@ class OBD(object):
             # loop through the *cmds list, append them as keys into the
             # cmd_msg dict, build the command string, then send and
             # parse the message updating the cmd_msg dict
-            cmd_msg = {}
             cmd_string = cmds[0].command[:2] # mode part
             for cmd in cmds:
-                pid_part = cmd.command[2:]
-                cmd_msg[pid_part] = cmd.bytes
-                cmd_string += pid_part
+                cmd_string += cmd.command[2:]
 
             # cmd_string built. send off for the response
             logger.info("cmd_string built: %s" % str(cmd_string)) # TODO: remove after testing
@@ -352,8 +349,7 @@ class OBD(object):
                 return OBDResponse()
 
             
-            #logger.info("Message rcvd: %s" % unhexlify(messages.data))  # TODO: remove after testing
-            logger.info("cmd_msg{}: %s" % cmd_msg) # TODO: remove after testing
+            #logger.info("Message rcvd: %s" % (messages.data))  # TODO: remove after testing
             
             # parse through the returned message finding the associated command
             # and how many bytes the command response is. then construct a response
@@ -369,7 +365,7 @@ class OBD(object):
                 print "master.data: " + master.data.decode()
                 while len(master.data) > 0:
                     pid = master.data[0]
-                    cmd = cmds_by_pid.get(pid, None)
+                    cmd = cmds_by_pid.get(pid)
                     print "pid: " + str(pid)
                     print "cmd: " + str(cmd.pid)
     
@@ -401,7 +397,7 @@ class OBD(object):
                     print "post-insert: " + message.data.decode()
                     
                     # decode the message
-                    if len(message.data.decode()) > 2:
+                    if len(message.data.decode().strip()) > 2:
                         responses[cmd] = cmd(message)
                 
                     # remove what we just read
