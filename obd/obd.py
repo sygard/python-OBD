@@ -370,6 +370,7 @@ class OBD(object):
                 cmd = cmds_by_pid.get(pid, None)
                 print "pid: " + str(pid)
                 print "cmd: " + str(cmd.pid)
+                print "master.data: " + master.data.decode()
 
                 # if the PID we pulled out wasn't one of the commands we were given
                 # then something is very wrong. Abort, and proceed with whatever
