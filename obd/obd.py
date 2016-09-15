@@ -393,13 +393,11 @@ class OBD(object):
                     print "frame[" + str(p) + "]: " + str(u.raw)
                     p += 1
                 message = Message(master.frames) # copy of the original lines
-                print "pre-chop: " + str(len(message.data))
                 message.data = master.data[:l]
-                print "post-chop: " + str(len(message.data))
+                print "post-chop: " + message.data.hex()
                 message.data.insert(0, mode) # prepend the original mode byte
+                print "post-insert: " + message.data.hex()
                 
-                print str(message.data)
-            
                 # decode the message
                 responses[cmd] = cmd(message)
             
