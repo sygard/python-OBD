@@ -360,7 +360,7 @@ class OBD(object):
             # message.
             # @brendan-w wrote this newer version
             master_blaster = messages #[0] # the message that contains our response
-            mode = master_blaster.data.pop(0) # the mode byte (ie, for mode 01 this would be 0x41)
+            mode = master_blaster[0].data.pop(0) # the mode byte (ie, for mode 01 this would be 0x41)
             
             cmds_by_pid = { cmd.pid:cmd for cmd in cmds }
             responses = { cmd:OBDResponse() for cmd in cmds }
