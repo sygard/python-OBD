@@ -389,7 +389,9 @@ class OBD(object):
             
                 # construct a new message
                 message = Message(master.frames) # copy of the original lines
+                print "pre-chop: " + str(len(message.data))
                 message.data = master.data[:l]
+                print "post-chop: " + str(len(message.data))
                 message.data.insert(0, mode) # prepend the original mode byte
                 
                 print str(message.data)
