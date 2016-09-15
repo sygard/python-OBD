@@ -366,8 +366,8 @@ class OBD(object):
                 while len(master.data) > 0:
                     pid = master.data[0]
                     cmd = cmds_by_pid.get(pid)
-                    print "pid: " + str(pid)
-                    print "cmd: " + str(cmd.pid)
+                    print "pid: " + hexlify(str(pid))
+                    print "cmd: " + hexlify(str(cmd.pid))
     
                     # if the PID we pulled out wasn't one of the commands we were given
                     # then something is very wrong. Abort, and proceed with whatever
