@@ -369,13 +369,10 @@ class OBD(object):
             
 <<<<<<< HEAD
             for master in master_blaster:
-                print "master.data: " + master.data.decode()
                 while len(master.data) > 0:
                     pid = master.data[0]
                     cmd = cmds_by_pid.get(pid)
-                    print "pid: " + hexlify(str(pid))
-                    print "cmd: " + hexlify(str(cmd.pid))
-    
+
                     # if the PID we pulled out wasn't one of the commands we were given
                     # then something is very wrong. Abort, and proceed with whatever
                     # we've decoded so far
@@ -384,7 +381,6 @@ class OBD(object):
                         break
         
                     l = cmd.bytes - 1 # this figure INCLUDES the PID byte
-                    print "l: " + str(l)
     
                     # if the message doesn't have enough data left in it to fulfill a
                     # PID, then abort, and proceed with whatever we've decoded so far
@@ -393,15 +389,9 @@ class OBD(object):
                         break
                 
                     # construct a new message
-                    p = 0
-                    for u in master.frames:
-                        print "frame[" + str(p) + "]: " + str(u.raw)
-                        p += 1
                     message = Message(master.frames) # copy of the original lines
                     message.data = master.data[:l]
-                    print "post-chop: " + message.data.decode()
                     message.data.insert(0, mode) # prepend the original mode byte
-                    print "post-insert: " + message.data.decode()
                     
                     # decode the message
                     if len(message.data.decode().strip()) > 4:
@@ -451,5 +441,11 @@ class OBD(object):
                 master.data = master.data[l:]
 >>>>>>> 9804933cce37b96df27ccadb67a4b23258805d5c
                 
+<<<<<<< HEAD
             print(responses)
             #return cmd(messages) # compute a response object
+=======
+
+            #return cmds(messages) # compute a response object
+            return responses
+>>>>>>> f8b4e1be0158e346a68cb78a0b61a59ab30db812
