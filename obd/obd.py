@@ -355,19 +355,12 @@ class OBD(object):
             # and how many bytes the command response is. then construct a response
             # message.
             # @brendan-w wrote this newer version
-<<<<<<< HEAD
             master_blaster = messages #[0] # the message that contains our response
             mode = master_blaster[0].data.pop(0) # the mode byte (ie, for mode 01 this would be 0x41)
-=======
-            master = messages[0] # the message that contains our response
-            print("master.data: " + master.data.decode())
-            mode = master.data.pop(0) # the mode byte (ie, for mode 01 this would be 0x41)
->>>>>>> 9804933cce37b96df27ccadb67a4b23258805d5c
             
             cmds_by_pid = { cmd.pid:cmd for cmd in cmds }
             responses = { cmd:OBDResponse() for cmd in cmds }
             
-<<<<<<< HEAD
             for master in master_blaster:
                 while len(master.data) > 0:
                     pid = master.data[0]
@@ -390,6 +383,7 @@ class OBD(object):
                 
                     # construct a new message
                     message = Message(master.frames) # copy of the original lines
+                    message.ecu = master.ecu
                     message.data = master.data[:l]
                     message.data.insert(0, mode) # prepend the original mode byte
                     
@@ -399,53 +393,7 @@ class OBD(object):
                 
                     # remove what we just read
                     master.data = master.data[l:]
-=======
-            while len(master.data) > 0:
-                pid = master.data[0]
-                cmd = cmds_by_pid.get(pid, None)
-                print("pid: " + str(pid))
-                print("cmd: " + str(cmd.pid))
-
-                # if the PID we pulled out wasn't one of the commands we were given
-                # then something is very wrong. Abort, and proceed with whatever
-                # we've decoded so far
-                if cmd is None:
-                    logger.info("Unrequested command answered: %s" % str(pid)) # TODO: remove after testing
-                    break
-    
-                l = cmd.bytes - 1 # this figure INCLUDES the PID byte
-                print("l: " + str(l))
-
-                # if the message doesn't have enough data left in it to fulfill a
-                # PID, then abort, and proceed with whatever we've decoded so far
-                if l > len(master.data):
-                    logger.info("Finished parsing query_multi response") # TODO: remove after testing
-                    break
-            
-                # construct a new message
-                p = 0
-                for u in master.frames:
-                    print "frame[" + str(p) + "]: " + str(u.raw)
-                    p += 1
-                message = Message(master.frames) # copy of the original lines
-                message.ecu = master.ecu
-                message.data = master.data[:l]
-                print("post-chop: " + message.data.decode())
-                message.data.insert(0, mode) # prepend the original mode byte
-                print("post-insert: " + message.data.decode())
                 
-                # decode the message
-                responses[cmd] = cmd([message])
-            
-                # remove what we just read
-                master.data = master.data[l:]
->>>>>>> 9804933cce37b96df27ccadb67a4b23258805d5c
-                
-<<<<<<< HEAD
-            print(responses)
-            #return cmd(messages) # compute a response object
-=======
 
             #return cmds(messages) # compute a response object
             return responses
->>>>>>> f8b4e1be0158e346a68cb78a0b61a59ab30db812
