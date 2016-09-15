@@ -401,7 +401,7 @@ class OBD(object):
                     print "post-insert: " + message.data.decode()
                     
                     # decode the message
-                    if len(message) > 2:
+                    if len(message.data.decode()) > 2:
                         responses[cmd] = cmd(message)
                 
                     # remove what we just read
