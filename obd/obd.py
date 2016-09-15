@@ -359,7 +359,7 @@ class OBD(object):
             # and how many bytes the command response is. then construct a response
             # message.
             # @brendan-w wrote this newer version
-            master = messages[0] # the message that contains our response
+            master = messages #[0] # the message that contains our response
             print "master.data: " + master.data.decode()
             mode = master.data.pop(0) # the mode byte (ie, for mode 01 this would be 0x41)
             
