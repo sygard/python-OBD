@@ -388,7 +388,10 @@ class OBD(object):
                     break
             
                 # construct a new message
-                print "master.frames: " + list(master.frames)
+                p = 0
+                for u in master.frames:
+                    print "frame[" + p + "] len: " + str(len(u))
+                    p += 1
                 message = Message(master.frames) # copy of the original lines
                 print "pre-chop: " + str(len(message.data))
                 message.data = master.data[:l]
