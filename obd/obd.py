@@ -293,7 +293,7 @@ class OBD(object):
         return cmd_string
 
 
-    def query_multi(self, cmds, force=False):
+    def query_multi(self, *cmds, **kwargs):
             """
                 primary API function. Sends multiple commands to
                 the car for CAN ONLY, and protects against sending
@@ -305,6 +305,7 @@ class OBD(object):
                 -@sommersoft
 
             """
+            force = kwargs.pop("force", False)
 
             if self.status() == OBDStatus.NOT_CONNECTED:
                 logger.warning("Query failed, no connection available")
@@ -386,14 +387,12 @@ class OBD(object):
                     message.ecu = master.ecu
                     message.data = master.data[:l]
                     message.data.insert(0, mode) # prepend the original mode byte
-                    
-                    # decode the message
-                    if len(message.data.decode().strip()) > 4:
-                        responses[cmd] = cmd(message)
+
+                    # NOTE: OBDCommands perform their own length checking
+                    responses[cmd] = cmd([message])
                 
                     # remove what we just read
                     master.data = master.data[l:]
                 
-
-            #return cmds(messages) # compute a response object
-            return responses
+            # return responses in the order that they were specified
+            return tuple(responses[cmd] for cmd in cmds)
