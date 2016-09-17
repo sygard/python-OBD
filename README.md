@@ -34,12 +34,19 @@ import obd
 
 connection = obd.OBD() # auto-connects to USB or RF port
 
-# query_multi(force=False/True, command1, ..., command6)
-# function uses an arbitrary argument (*arg) for the commands, so the force argument must be entered.
-# do not place commands into a list/tuple variable, and pass that to the function; place them directly in the call
-response = connection.query_multi(False, obd.commands.SPEED, obd.commands.RPM, obd.commands.XXX) # send the command, and parse the response
+# query_multi(command1, ..., command6, force=False/True)
+# function uses an arbitrary argument (*args) for the commands, and keyword arg (**kwargs) for command forcing.
 
-# response parsing is still in development
+# commands can be input directly into the query_multi call
+speed, rpm = connection.query_multi(obd.commands.SPEED, obd.commands.RPM) # send the command, and parse the response
+
+# or, commands can be placed into a list, and then into the query_multi call. list variable must be unpacked with '*'
+cmds = [obd.commands.SPEED, obd.commands.RPM]
+speed, rpm = connection.query_multi(*cmds) # send the command, and parse the response
+
+# responses will be assigned as OBDCommand objects into the variable order you called them
+print(speed.value)
+print(rpm.value)
 ```
 
 Documentation
