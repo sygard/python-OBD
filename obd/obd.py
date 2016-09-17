@@ -299,10 +299,10 @@ class OBD(object):
                 the car for CAN ONLY, and protects against sending
                 unsupported commands.
 
-                will (hopefully) return a dict object with cmd:msg
-                format.
+                returns a tuple of OBDCommand objects in the order
+                of *cmds
 
-                -@sommersoft
+                -@sommersoft & @brendan-w
 
             """
             force = kwargs.pop("force", False)
@@ -349,19 +349,16 @@ class OBD(object):
                 logger.info("No valid OBD Messages returned")
                 return OBDResponse()
 
-            
-            #logger.info("Message rcvd: %s" % (messages.data))  # TODO: remove after testing
-            
             # parse through the returned message finding the associated command
             # and how many bytes the command response is. then construct a response
             # message.
             # @brendan-w wrote this newer version
             master_blaster = messages #[0] # the message that contains our response
             mode = master_blaster[0].data.pop(0) # the mode byte (ie, for mode 01 this would be 0x41)
-            
+
             cmds_by_pid = { cmd.pid:cmd for cmd in cmds }
             responses = { cmd:OBDResponse() for cmd in cmds }
-            
+
             for master in master_blaster:
                 while len(master.data) > 0:
                     pid = master.data[0]
@@ -373,7 +370,7 @@ class OBD(object):
                     if cmd is None:
                         logger.info("Unrequested command answered: %s" % str(pid)) # TODO: remove after testing
                         break
-        
+    
                     l = cmd.bytes - 1 # this figure INCLUDES the PID byte
     
                     # if the message doesn't have enough data left in it to fulfill a
@@ -381,7 +378,7 @@ class OBD(object):
                     if l > len(master.data):
                         logger.info("Finished parsing query_multi response") # TODO: remove after testing
                         break
-                
+    
                     # construct a new message
                     message = Message(master.frames) # copy of the original lines
                     message.ecu = master.ecu
@@ -390,9 +387,9 @@ class OBD(object):
 
                     # NOTE: OBDCommands perform their own length checking
                     responses[cmd] = cmd([message])
-                
+
                     # remove what we just read
                     master.data = master.data[l:]
-                
+   
             # return responses in the order that they were specified
             return tuple(responses[cmd] for cmd in cmds)
