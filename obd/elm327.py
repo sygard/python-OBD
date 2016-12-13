@@ -194,13 +194,20 @@ class ELM327:
 
     def manual_protocol(self, protocol):
         r = self.__send(b"ATTP" + protocol.encode())
-        r0100 = self.__send(b"0100")
+	num_attempts=3
+	while True:
+        	r0100 = self.__send(b"0100")
 
-        if not self.__has_message(r0100, "UNABLE TO CONNECT"):
-            # success, found the protocol
-            self.__protocol = self._SUPPORTED_PROTOCOLS[protocol](r0100)
-            return True
-
+	        if not self.__has_message(r0100, "UNABLE TO CONNECT") and \
+				not self.__has_message(r0100, "BUS INIT: ... ERROR"):
+            		# success, found the protocol
+            		self.__protocol = self._SUPPORTED_PROTOCOLS[protocol](r0100)
+            		return True
+		else:
+			time.sleep(3 - num_attempts)
+			num_attempts-=1
+			if num_attempts == 0:
+				break
         return False
 
 
@@ -438,7 +445,8 @@ class ELM327:
 
         while True:
             # retrieve as much data as possible
-            data = self.__port.read(self.__port.in_waiting or 1)
+#            data = self.__port.read(self.__port.in_waiting or 1)
+            data = self.__port.read(self.__port.inWaiting() or 1)
 
             # if nothing was recieved
             if not data:

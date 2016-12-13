@@ -25,5 +25,6 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    install_requires=["pyserial==3.*", "pint==0.7.*"],
+#    install_requires=["pyserial==3.*", "pint==0.7.*"],
+    install_requires=["pyserial>=3", "pint>=0.7"],
 )
